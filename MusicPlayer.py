@@ -8,32 +8,62 @@ from playsound import playsound
 class Cancion:
     def __init__(self, titulo, ruta):
         self.titulo = titulo  # Titulo de la canción
+        self.ruta = ruta
         self.ant = None #Canción anterior
         self.sig = None  # Canción siguiente
+    def setSig(self, cancion):
+        self.sig = cancion
+    def setAnt(self, cancion):
+        self.ant = cancion
+    def getSig(self, cancion):
+        return self.sig
+    def getAnt(self, cancion):
+        return self.ant 
+    def getTitulo(self, titulo):
+        return self.titulo
 
 class SongLibrary:
     def __init__(self):
-        self.head = None  # Points to the first song in the list
+        self.PTR = None 
+        self.FINAL = None
 
-    def add_song(self, titulo, ruta):
-        new_song = Cancion(titulo, ruta)
-        if self.head is None:  # If the library is empty, make this the first song
-            self.head = new_song
+    def add_cancion(self, titulo, ruta):
+        cancion = Cancion(titulo, ruta)
+        if self.PTR == None:  
+            self.PTR = cancion
         else:
-            # Traverse to the end of the list and add the new song
-            current = self.head
-            while current.sig:
-                current = current.sig
-            current.sig = new_song
-            new_song.ant = current
+            self.FINAL.sig = cancion
+            cancion.setAnt = self.FINAL
+        self.FINAL = cancion
+        self.FINAL.setSig = self.PTR
+        self.PTR.setAnt = cancion
+    
+    def search_cancion(self, titulo):
+        cancion = self.PTR
+        while cancion:
+            if cancion.getTitulo == titulo:
+                return cancion
+            else:
+                cancion = cancion.getSig
+    
 
-    def get_all_songs(self):
-        songs = []
-        current = self.head
-        while current:
-            songs.append(current.titulo)  # Collect song titles
-            current = current.sig
-        return songs
+    def get_canciones(self):
+        canciones = []
+        cancion = self.PTR
+        while cancion:
+            canciones.append(cancion.getTitulo)  # Collect song titles
+            cancion = cancion.getSig
+        return canciones
+    
+    def getPTR(self):
+        try:
+          if self.PTR == None:
+              return "------"
+          else:
+            return self.PTR.getTitulo
+        except:
+            return None
+
     
 class MusicPlayerApp:
 #Crear ventana de reproducción
@@ -56,14 +86,14 @@ class MusicPlayerApp:
 
         self.setup_main_window()
 
-# Método Imagen
+    # Método cargar Imagen
      def add_Img(self, index, ruta):
         try:
             self.Img[index] = tk.PhotoImage(file=ruta)
         except Exception as e:
             print(f"Failed to load image at {ruta}: {e}")
     
-
+    #Método crear la ventana con imágenes
      def setup_main_window(self):
         # Colocar fondo
         bg = Label(self.window, image = self.Img[1]) #Bg es un label para mostrarlo de fondo porque no hay forma de hacerlo directamente con window
@@ -92,15 +122,19 @@ class MusicPlayerApp:
         self.btn_pausa.bind("<Button-1>", self.pausa)
         self.btn_pausa.place(x = 166, y = 200)
 
+        #Poner nombre de la canción sonando
+        self.titulo = tk.Label(self.window, text = self.library.getPTR, font = ("Arial",16))
+        self.titulo.place(x = 100, y = 100)
+        
 
 
 
-            # Añadir funcionalidad a los botones
+    # Añadir funcionalidad a los botones
      def buttonNota(self, event):
         print("¡Botón presionado!")
 
      def anterior(self,event):
-        print("Anterior")
+        print(self.library.getPTR)
 
      def siguiente(self,event):
         print("Siguiente")
@@ -118,13 +152,17 @@ class MusicPlayerApp:
         self.pause_state = not self.pause_state
 
 
+     def addSong(self, titulo, ruta):
+         self.library.add_cancion(titulo, ruta)
+
+
 
 
 #Run 
 if __name__ == "__main__":
     window = tk.Tk()
     app = MusicPlayerApp(window)
-    #app.add_song_to_library("Song 1", "path/to/song1.mp3")
-    #app.add_song_to_library("Song 2", "path/to/song2.mp3")
-    #app.add_song_to_library("Song 3", "path/to/song3.mp3")
+    app.addSong("...Baby One More Time", os.path.join("music", "...Baby One More Time.mp3"))
+    #app.addSong("Song 2", "path/to/song2.mp3")
+    #app.addSong("Song 3", "path/to/song3.mp3")
     window.mainloop()
